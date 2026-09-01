@@ -1,6 +1,7 @@
 # AdPilot backend
 
 FastAPI + pandas + SQLAlchemy. See `../02_ARCHITECTURE.md` and `../03_RULES.md`.
+External-service setup (Supabase, Twilio) is tracked in `../SETUP.md`.
 
 ## Run locally
 
@@ -22,6 +23,18 @@ SQLite file (`adpilot.db`); set a Postgres URL for deploy.
 cd backend
 .venv/Scripts/python -m pytest
 ```
+
+## Twilio WhatsApp sandbox smoke test (Phase 0)
+
+Once `TWILIO_*` vars are set in `.env` (see `../SETUP.md`):
+
+```bash
+cd backend
+.venv/Scripts/python -m scripts.whatsapp_smoke_test +9198XXXXXXXX
+```
+
+Sends one WhatsApp message to a phone that has joined the sandbox. Standalone —
+no app or DB involved.
 
 ## Phase 1 status — data pipeline
 

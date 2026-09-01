@@ -8,6 +8,7 @@ psycopg2-binary==2.9.10
 pydantic==2.10.4
 pydantic-settings==2.7.1
 python-dotenv==1.0.1
+twilio==9.4.1
 
 # dev / test
 pytest==8.3.4
