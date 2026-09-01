@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,6 +23,20 @@ class Settings(BaseSettings):
     twilio_account_sid: str | None = None
     twilio_auth_token: str | None = None
     twilio_whatsapp_number: str | None = None
+
+    @field_validator(
+        "waste_cost_threshold",
+        "llm_api_key",
+        "twilio_account_sid",
+        "twilio_auth_token",
+        "twilio_whatsapp_number",
+        mode="before",
+    )
+    @classmethod
+    def _empty_string_to_none(cls, v: object) -> object:
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
 
 
 @lru_cache

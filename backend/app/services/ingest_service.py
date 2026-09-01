@@ -83,7 +83,7 @@ def store_report(
 
         summaries.append(
             CampaignSummary(
-                id=campaign.id,
+                id=str(campaign.id),
                 name=name,
                 spend=campaign.spend,
                 impressions=campaign.impressions,
@@ -98,7 +98,7 @@ def store_report(
 
     avg = report.averages
     return UploadResponse(
-        account_id=account.id,
+        account_id=str(account.id),
         campaigns=len(summaries),
         keywords=len(report.rows),
         rows_ingested=len(report.rows),
