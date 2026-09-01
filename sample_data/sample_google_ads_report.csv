@@ -1,0 +1,13 @@
+Campaign,Ad Group,Keyword,Search Term,Match Type,Impressions,Clicks,Cost,Conversions,Conv. Value
+Brand Search,Brand,adpilot shoes,adpilot shoes,Exact,2000,300,1500,40,20000
+Brand Search,Brand,adpilot store,adpilot store near me,Phrase,800,90,500,12,6000
+Brand Search,Brand,adpilot coupon,adpilot coupon code,Phrase,700,25,300,1,400
+Generic Shoes,Running,buy shoes online,buy shoes online,Phrase,5000,250,3000,5,2500
+Generic Shoes,Running,running shoes,best running shoes,Broad,3000,120,1800,3,1800
+Generic Shoes,Clearance,cheap shoes online,cheap shoes online,Broad,4000,83,"1,240.00",0,0
+Generic Shoes,Repair,shoe repair,shoe repair near me,Broad,1200,45,700,0,0
+Generic Shoes,Kids,kids shoes,kids shoes size 3,Phrase,1500,8,120,0,0
+Generic Shoes,Boots,leather boots,leather boots mens,Broad,2200,15,450,0,0
+Clearance Sale,Sneakers,discount sneakers,discount sneakers,Phrase,2500,60,900,4,1600
+Clearance Sale,Sneakers,sneaker sale,sneaker sale,Broad,6000,40,600,2,900
+Clearance Sale,Free,free shoes,free shoes giveaway,Broad,900,35,260,0,0

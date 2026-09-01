@@ -1,0 +1,51 @@
+"""Database engine, session factory, and ORM base.
+
+Mirrors the schema in ``02_ARCHITECTURE.md`` / ``schema.sql``. On SQLite (local
+dev) the tables are created from the ORM metadata; on Postgres, run
+``schema.sql`` (or let ``init_db`` create them — the definitions match).
+"""
+from __future__ import annotations
+
+import uuid
+from collections.abc import Iterator
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+
+from app.config import get_settings
+
+_settings = get_settings()
+_is_sqlite = _settings.database_url.startswith("sqlite")
+
+engine = create_engine(
+    _settings.database_url,
+    connect_args={"check_same_thread": False} if _is_sqlite else {},
+    pool_pre_ping=not _is_sqlite,
+    future=True,
+)
+
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+def new_uuid() -> str:
+    return str(uuid.uuid4())
+
+
+def init_db() -> None:
+    """Create tables if they do not exist. Safe to call on every startup."""
+    from app.models import tables  # noqa: F401  (register mappers)
+
+    Base.metadata.create_all(bind=engine)
+
+
+def get_db() -> Iterator[Session]:
+    """FastAPI dependency: yields a session and always closes it."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
