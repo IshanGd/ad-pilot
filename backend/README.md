@@ -58,6 +58,33 @@ no app or DB involved.
 Returns the new `account_id`, campaign/keyword counts, account totals, aggregate
 account averages, and a per-campaign breakdown (sorted by spend).
 
+## Phase 2 status — recommendation engine
+
+| Item | State |
+|---|---|
+| `engine/rules.py` — rule logic from `03_RULES.md` §1 (pure, no DB/LLM) | done |
+| `POST /api/analyze` — run rules for an account, write `recommendations` | done |
+| `GET /api/recommendations?account_id=…` | done |
+| Verified by hand against the sample CSV (`tests/test_rules.py`) | done |
+| `engine/anomaly.py` (stretch) | not started |
+
+### Analyze / recommendations endpoints
+
+`POST /api/analyze` — body `{"account_id": "..."}`. Recomputes recommendations
+for the account from its stored keywords, **replacing** the previous run. Returns
+the headline `total_waste_identified` (₹ on `PAUSE_KEYWORD` + `ADD_NEGATIVE`),
+`by_severity` / `by_type` counts, and the ranked list.
+
+`GET /api/recommendations?account_id=…` — the persisted list, same ranking.
+
+Recommendation types: `PAUSE_KEYWORD` (HIGH), `INCREASE_BUDGET` / `ADD_NEGATIVE`
+(MEDIUM), `REVIEW_LOW_CTR` (LOW). Ranked by severity, then ₹ impact desc. The
+`WASTE_COST_THRESHOLD` defaults to `max(₹500, 5% of account spend)`; override with
+the env var.
+
+`explanation` is a deterministic template built from the input numbers — Phase 4
+replaces it with validated LLM text. No LLM calls in this phase.
+
 ### Notes / deviations from the architecture doc
 
 - Money is stored as `float` (rupees) rather than `NUMERIC`/`Decimal`, to avoid

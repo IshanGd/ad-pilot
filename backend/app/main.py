@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.models.db import init_db
-from app.routes import upload
+from app.routes import analyze, upload
 
 
 @asynccontextmanager
@@ -32,6 +32,7 @@ app.add_middleware(
 )
 
 app.include_router(upload.router)
+app.include_router(analyze.router)
 
 
 @app.get("/health", tags=["meta"])

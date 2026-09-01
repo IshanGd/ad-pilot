@@ -72,3 +72,19 @@ class Keyword(Base):
     cpa: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     campaign: Mapped[Campaign] = relationship(back_populates="keywords")
+
+
+class Recommendation(Base):
+    __tablename__ = "recommendations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), index=True)
+    keyword_id: Mapped[str | None] = mapped_column(
+        ForeignKey("keywords.id"), nullable=True, index=True
+    )
+    type: Mapped[str] = mapped_column(String(32))
+    severity: Mapped[str] = mapped_column(String(8))
+    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    estimated_impact: Mapped[float | None] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="PENDING")

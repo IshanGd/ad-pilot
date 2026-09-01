@@ -44,3 +44,37 @@ class UploadResponse(BaseModel):
 class ErrorResponse(BaseModel):
     detail: str
     missing_columns: list[str] = Field(default_factory=list)
+
+
+# --- Phase 2: recommendation engine ---------------------------------------
+
+
+class AnalyzeRequest(BaseModel):
+    account_id: str
+
+
+class RecommendationOut(BaseModel):
+    id: str
+    campaign_id: str
+    campaign_name: str
+    keyword_id: str | None
+    label: str
+    type: str
+    severity: str
+    confidence: float | None
+    estimated_impact: float | None
+    explanation: str | None
+    status: str
+
+
+class RecommendationsResponse(BaseModel):
+    account_id: str
+    total_waste_identified: float
+    recommendation_count: int
+    by_severity: dict[str, int]
+    by_type: dict[str, int]
+    recommendations: list[RecommendationOut]
+
+
+class AnalyzeResponse(RecommendationsResponse):
+    analyzed_keywords: int
