@@ -9,7 +9,9 @@ export const DEMO_ACCOUNT_ID = "demo";
 
 export const DEMO_AUDIT: AnalyzeResponse = {
   account_id: DEMO_ACCOUNT_ID,
+  language: "en",
   analyzed_keywords: 12,
+  llm_explanations: 0,
   total_waste_identified: 2200,
   recommendation_count: 8,
   by_severity: { HIGH: 2, MEDIUM: 3, LOW: 3 },

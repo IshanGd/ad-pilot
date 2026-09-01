@@ -58,6 +58,28 @@ no app or DB involved.
 Returns the new `account_id`, campaign/keyword counts, account totals, aggregate
 account averages, and a per-campaign breakdown (sorted by spend).
 
+## Phase 4 status — LLM explainer
+
+| Item | State |
+|---|---|
+| `engine/explainer.py` — structured-JSON in, plain sentences out (03_RULES §3) | done |
+| Number-grounding validation before any generated text is used | done |
+| Template fallback (also the path when no `LLM_API_KEY` is set) | done |
+| Hindi (`hi`) supported end to end: upload → analyze → explainer → API | done |
+
+`POST /api/analyze` now runs the explainer after the rules. Response gains
+`language`, `llm_explanations` (how many came from the LLM vs template), and
+`explanation_source` per recommendation (`llm` | `template`; `stored` on GET).
+
+- `POST /api/analyze` body accepts an optional `language` (`en` | `hi`); when
+  given it is saved back to the account.
+- The LLM only ever receives rounded, structured numbers — never CSV rows. Every
+  figure in the returned text must already be in that input or the text is
+  discarded for a template. Jargon (`CPA`/`CTR`/…) or a language mismatch also
+  forces the template.
+- Model: `LLM_MODEL` (default `claude-sonnet-5`). One batched call per audit.
+- No key configured → every explanation is a template; the audit is unchanged.
+
 ## Phase 2 status — recommendation engine
 
 | Item | State |

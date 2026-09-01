@@ -1,23 +1,29 @@
 import Link from "next/link";
-import { analyze, ApiError } from "@/lib/api";
+import { analyze, ApiError, type Language } from "@/lib/api";
 import { DEMO_ACCOUNT_ID, DEMO_AUDIT } from "@/lib/fixtures";
 import { AuditResult } from "@/components/AuditResult";
 import type { AnalyzeResponse } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+function toLanguage(value: string | string[] | undefined): Language {
+  return value === "hi" ? "hi" : "en";
+}
+
 export default async function AuditPage({
   params,
+  searchParams,
 }: PageProps<"/audit/[accountId]">) {
   const { accountId } = await params;
+  const language = toLanguage((await searchParams).lang);
 
   if (accountId === DEMO_ACCOUNT_ID) {
-    return <AuditResult audit={DEMO_AUDIT} />;
+    return <AuditResult audit={DEMO_AUDIT} language="en" />;
   }
 
   let audit: AnalyzeResponse;
   try {
-    audit = await analyze(accountId);
+    audit = await analyze(accountId, language);
   } catch (err) {
     const notFound = err instanceof ApiError && err.status === 404;
     return (
@@ -42,5 +48,5 @@ export default async function AuditPage({
     );
   }
 
-  return <AuditResult audit={audit} />;
+  return <AuditResult audit={audit} language={(audit.language as Language) ?? language} />;
 }

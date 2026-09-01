@@ -1,20 +1,17 @@
 """Run the rule engine over a stored account and persist recommendations.
 
 Route handlers call these functions; all the rule logic lives in
-``engine/rules.py`` and stays independently testable (03_RULES.md section 6).
+``engine/rules.py`` and the plain-language text in ``engine/explainer.py`` —
+both stay independently testable (03_RULES.md section 6).
 """
 from __future__ import annotations
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.engine.explainer import explain, normalize_language
 from app.engine.metrics import KeywordStats, account_averages, keyword_metrics
-from app.engine.rules import (
-    KeywordRow,
-    Recommendation as RuleRecommendation,
-    analyze_keywords,
-    total_waste_identified,
-)
+from app.engine.rules import KeywordRow, analyze_keywords, total_waste_identified
 from app.models.tables import Account, Campaign, Keyword, Recommendation
 from app.schemas import (
     AnalyzeResponse,
@@ -23,6 +20,7 @@ from app.schemas import (
 )
 
 _SEVERITY_RANK = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
+_WASTE_TYPES = {"PAUSE_KEYWORD", "ADD_NEGATIVE"}
 
 
 def _load_account(db: Session, account_id: str) -> Account:
@@ -37,10 +35,22 @@ def _keyword_label(kw: Keyword) -> str:
 
 
 def run_analysis(
-    db: Session, account_id: str, *, configured_threshold: float | None = None
+    db: Session,
+    account_id: str,
+    *,
+    configured_threshold: float | None = None,
+    language: str | None = None,
 ) -> AnalyzeResponse:
-    """Recompute recommendations for an account, replacing any previous run."""
-    _load_account(db, account_id)
+    """Recompute recommendations for an account, replacing any previous run.
+
+    When ``language`` is given it overrides (and is saved back to) the account's
+    ``preferred_language``.
+    """
+    account = _load_account(db, account_id)
+
+    lang = normalize_language(language or account.preferred_language)
+    if language is not None and lang != account.preferred_language:
+        account.preferred_language = lang
 
     campaigns = db.scalars(
         select(Campaign).where(Campaign.account_id == account_id)
@@ -84,6 +94,16 @@ def run_analysis(
         rows, averages, configured_threshold=configured_threshold
     )
 
+    # Plain-language text. Every number is verified against the rule input before
+    # use; anything that fails falls back to a template (engine/explainer.py).
+    explained = explain(rule_recs, lang)
+
+    def _text(r) -> str:
+        e = explained.by_ref.get(r.keyword_id)
+        return e.text if e is not None else r.explanation
+
+    sources = {ref: e.source for ref, e in explained.by_ref.items()}
+
     # Replace the previous run for this account.
     if campaign_ids:
         db.query(Recommendation).filter(
@@ -96,7 +116,7 @@ def run_analysis(
             keyword_id=r.keyword_id,
             type=r.type,
             severity=r.severity,
-            explanation=r.explanation,
+            explanation=_text(r),
             confidence=r.confidence,
             estimated_impact=r.estimated_impact,
             status="PENDING",
@@ -107,13 +127,17 @@ def run_analysis(
     db.commit()
 
     labels = {str(r.keyword_id): r.label for r in rule_recs}
-    out = _to_out(orm_recs, campaign_names, labels)
-    base = _aggregate(account_id, out, total_waste_identified(rule_recs))
-    return AnalyzeResponse(analyzed_keywords=len(rows), **base.model_dump())
+    out = _to_out(orm_recs, campaign_names, labels, sources)
+    base = _aggregate(account_id, lang, out, total_waste_identified(rule_recs))
+    return AnalyzeResponse(
+        analyzed_keywords=len(rows),
+        llm_explanations=explained.llm_count,
+        **base.model_dump(),
+    )
 
 
 def get_recommendations(db: Session, account_id: str) -> RecommendationsResponse:
-    _load_account(db, account_id)
+    account = _load_account(db, account_id)
 
     rows = db.execute(
         select(Recommendation, Campaign, Keyword)
@@ -129,20 +153,21 @@ def get_recommendations(db: Session, account_id: str) -> RecommendationsResponse
         if kw is not None
     }
     recs = [rec for rec, _, _ in rows]
-    out = _to_out(recs, campaign_names, labels)
+    out = _to_out(recs, campaign_names, labels, sources=None)
 
     waste = sum(
-        r.estimated_impact or 0.0
-        for r in recs
-        if r.type in {"PAUSE_KEYWORD", "ADD_NEGATIVE"}
+        r.estimated_impact or 0.0 for r in recs if r.type in _WASTE_TYPES
     )
-    return _aggregate(account_id, out, waste)
+    return _aggregate(
+        account_id, normalize_language(account.preferred_language), out, waste
+    )
 
 
 def _to_out(
     recs: list[Recommendation],
     campaign_names: dict[str, str],
     labels: dict[str, str],
+    sources: dict[str, str] | None,
 ) -> list[RecommendationOut]:
     items = [
         RecommendationOut(
@@ -156,6 +181,11 @@ def _to_out(
             confidence=r.confidence,
             estimated_impact=r.estimated_impact,
             explanation=r.explanation,
+            explanation_source=(
+                sources.get(str(r.keyword_id), "template")
+                if sources is not None
+                else "stored"
+            ),
             status=r.status,
         )
         for r in recs
@@ -171,7 +201,10 @@ def _to_out(
 
 
 def _aggregate(
-    account_id: str, out: list[RecommendationOut], waste: float
+    account_id: str,
+    language: str,
+    out: list[RecommendationOut],
+    waste: float,
 ) -> RecommendationsResponse:
     by_severity: dict[str, int] = {}
     by_type: dict[str, int] = {}
@@ -180,6 +213,7 @@ def _aggregate(
         by_type[r.type] = by_type.get(r.type, 0) + 1
     return RecommendationsResponse(
         account_id=account_id,
+        language=language,
         total_waste_identified=round(waste, 2),
         recommendation_count=len(out),
         by_severity=by_severity,

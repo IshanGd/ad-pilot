@@ -18,8 +18,13 @@ class Settings(BaseSettings):
     # max(500, 5% of total account spend). See 03_RULES.md section 1.
     waste_cost_threshold: float | None = None
 
-    # Later phases — unused in Phase 1.
+    # LLM explainer (Phase 4). When llm_api_key is unset the explainer falls back
+    # to deterministic templates, so the audit still works with no LLM configured.
     llm_api_key: str | None = None
+    llm_model: str = "claude-sonnet-5"
+    explainer_enabled: bool = True
+
+    # Twilio (Phase 5-6).
     twilio_account_sid: str | None = None
     twilio_auth_token: str | None = None
     twilio_whatsapp_number: str | None = None

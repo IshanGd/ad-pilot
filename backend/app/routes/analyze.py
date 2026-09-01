@@ -29,6 +29,7 @@ def analyze(
             db,
             body.account_id,
             configured_threshold=get_settings().waste_cost_threshold,
+            language=body.language,
         )
     except LookupError as exc:
         raise HTTPException(

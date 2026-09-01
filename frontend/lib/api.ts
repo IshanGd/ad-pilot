@@ -51,11 +51,19 @@ export async function uploadCsv(
   return res.json();
 }
 
-export async function analyze(accountId: string): Promise<AnalyzeResponse> {
+export type Language = "en" | "hi";
+
+export async function analyze(
+  accountId: string,
+  language?: Language,
+): Promise<AnalyzeResponse> {
   const res = await fetch(`${API_BASE}/api/analyze`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ account_id: accountId }),
+    body: JSON.stringify({
+      account_id: accountId,
+      ...(language ? { language } : {}),
+    }),
     cache: "no-store",
   });
   if (!res.ok) throw new ApiError(await readError(res), res.status);

@@ -19,11 +19,13 @@ export interface RecommendationOut {
   confidence: number | null;
   estimated_impact: number | null;
   explanation: string | null;
+  explanation_source?: "llm" | "template" | "stored" | null;
   status: string;
 }
 
 export interface RecommendationsResponse {
   account_id: string;
+  language: "en" | "hi";
   total_waste_identified: number;
   recommendation_count: number;
   by_severity: Partial<Record<Severity, number>>;
@@ -33,6 +35,7 @@ export interface RecommendationsResponse {
 
 export interface AnalyzeResponse extends RecommendationsResponse {
   analyzed_keywords: number;
+  llm_explanations: number;
 }
 
 export interface CampaignSummary {

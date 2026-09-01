@@ -51,6 +51,9 @@ class ErrorResponse(BaseModel):
 
 class AnalyzeRequest(BaseModel):
     account_id: str
+    # Optional per-run override of the account's preferred_language ("en" | "hi").
+    # When set it is also saved back to the account. 03_RULES.md section 5.
+    language: str | None = None
 
 
 class RecommendationOut(BaseModel):
@@ -64,11 +67,13 @@ class RecommendationOut(BaseModel):
     confidence: float | None
     estimated_impact: float | None
     explanation: str | None
+    explanation_source: str | None = None  # "llm" | "template" | "stored"
     status: str
 
 
 class RecommendationsResponse(BaseModel):
     account_id: str
+    language: str
     total_waste_identified: float
     recommendation_count: int
     by_severity: dict[str, int]
@@ -78,3 +83,4 @@ class RecommendationsResponse(BaseModel):
 
 class AnalyzeResponse(RecommendationsResponse):
     analyzed_keywords: int
+    llm_explanations: int  # how many explanations came from the LLM (rest are templates)

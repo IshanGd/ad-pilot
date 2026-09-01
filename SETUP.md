@@ -9,6 +9,7 @@ External-service setup that has to exist before the later phases. Tracks
 | Postgres schema (`backend/app/models/schema.sql`) | done |
 | Supabase Postgres provisioned + schema applied | done |
 | Twilio account + WhatsApp Sandbox + join flow confirmed | **todo — see below** |
+| LLM API key (Phase 4 explainer) | optional — see §3 |
 | Team split | see `04_PHASES.md` "Team split" |
 
 ---
@@ -93,3 +94,26 @@ Common failures the script explains:
 The sandbox's "When a message comes in" webhook URL is configured in Phase 6,
 once `POST /api/whatsapp/webhook` exists and the backend is deployed. Nothing to
 do now.
+
+---
+
+## 3. LLM API key (Phase 4 explainer — optional)
+
+The audit works without this: with no key, recommendation explanations use
+deterministic templates (English and Hindi). Add a key to get LLM-written
+phrasing — every number in it is still verified against the rule input before
+it's shown.
+
+1. Get an Anthropic API key from <https://console.anthropic.com> (`sk-ant-...`).
+2. In `backend/.env`:
+
+   ```
+   LLM_API_KEY=sk-ant-...
+   LLM_MODEL=claude-sonnet-5
+   ```
+
+3. Restart the backend. `POST /api/analyze` responses will show
+   `"llm_explanations"` > 0 and `"explanation_source": "llm"` on recommendations
+   whose generated text passed validation.
+
+Set `EXPLAINER_ENABLED=false` to force templates even with a key present.

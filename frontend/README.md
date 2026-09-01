@@ -25,6 +25,9 @@ audit — see `../backend/README.md`.
 
 - `/audit/demo` renders the sample-CSV result from a static fixture
   (`lib/fixtures.ts`) — no backend needed. Handy for the demo and offline dev.
+- `/audit/[id]?lang=hi` runs the audit in Hindi (Phase 4). The English ⇄ हिन्दी
+  toggle on the result screen re-runs `POST /api/analyze` with that language and
+  localises the whole screen — recommendation text, headline, and chrome.
 - `components/WhatsAppOptIn.tsx` is present per the design but only acknowledges
   on submit; Phase 5 wires it to `POST /api/whatsapp/opt-in`.
 - Recharts (in the architecture doc) isn't used yet — the Phase 3 screens are
