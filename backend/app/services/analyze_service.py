@@ -45,8 +45,8 @@ def run_analysis(
     campaigns = db.scalars(
         select(Campaign).where(Campaign.account_id == account_id)
     ).all()
-    campaign_names = {c.id: c.name for c in campaigns}
-    campaign_ids = list(campaign_names)
+    campaign_names = {str(c.id): c.name for c in campaigns}
+    campaign_ids = [c.id for c in campaigns]
 
     keywords: list[Keyword] = []
     if campaign_ids:
@@ -70,8 +70,8 @@ def run_analysis(
 
     rows = [
         KeywordRow(
-            keyword_id=kw.id,
-            campaign_id=kw.campaign_id,
+            keyword_id=str(kw.id),
+            campaign_id=str(kw.campaign_id),
             label=_keyword_label(kw),
             search_term=kw.search_term,
             stats=stats_by_keyword[kw.id],
@@ -106,7 +106,7 @@ def run_analysis(
     db.add_all(orm_recs)
     db.commit()
 
-    labels = {r.keyword_id: r.label for r in rule_recs}
+    labels = {str(r.keyword_id): r.label for r in rule_recs}
     out = _to_out(orm_recs, campaign_names, labels)
     base = _aggregate(account_id, out, total_waste_identified(rule_recs))
     return AnalyzeResponse(analyzed_keywords=len(rows), **base.model_dump())
@@ -122,9 +122,9 @@ def get_recommendations(db: Session, account_id: str) -> RecommendationsResponse
         .where(Campaign.account_id == account_id)
     ).all()
 
-    campaign_names = {c.id: c.name for _, c, _ in rows}
+    campaign_names = {str(c.id): c.name for _, c, _ in rows}
     labels = {
-        rec.keyword_id: _keyword_label(kw)
+        str(rec.keyword_id): _keyword_label(kw)
         for rec, _, kw in rows
         if kw is not None
     }
@@ -146,11 +146,11 @@ def _to_out(
 ) -> list[RecommendationOut]:
     items = [
         RecommendationOut(
-            id=r.id,
-            campaign_id=r.campaign_id,
-            campaign_name=campaign_names.get(r.campaign_id, ""),
-            keyword_id=r.keyword_id,
-            label=labels.get(r.keyword_id, ""),
+            id=str(r.id),
+            campaign_id=str(r.campaign_id),
+            campaign_name=campaign_names.get(str(r.campaign_id), ""),
+            keyword_id=str(r.keyword_id) if r.keyword_id is not None else None,
+            label=labels.get(str(r.keyword_id), ""),
             type=r.type,
             severity=r.severity,
             confidence=r.confidence,

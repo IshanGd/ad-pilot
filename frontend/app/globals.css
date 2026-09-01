@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/*
+  AdPilot web app — flat, uncluttered, light. 05_DESIGN.md section 6:
+  colour carries meaning (severity), never decoration.
+*/
+
+:root {
+  --background: #f7f7f5;
+  --surface: #ffffff;
+  --foreground: #1a1a1a;
+  --muted: #6b6b6b;
+  --border: #e6e6e2;
+  --brand: #1f6feb;
+
+  /* Severity — used identically on every screen and in every message. */
+  --sev-high: #d92d20;
+  --sev-high-bg: #fef3f2;
+  --sev-medium: #b54708;
+  --sev-medium-bg: #fffaeb;
+  --sev-low: #475467;
+  --sev-low-bg: #f2f4f7;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Keep the light look regardless of OS dark mode — this is a daytime tool. */
