@@ -34,6 +34,11 @@ psql "$DATABASE_URL_PLAIN" -f backend/app/models/schema.sql
 
 (`$DATABASE_URL_PLAIN` = the same URL without the `+psycopg2` driver suffix.)
 
+`schema.sql` is written to be safe to re-run (`IF NOT EXISTS` / `ADD COLUMN IF
+NOT EXISTS`). The Phase 5 additions — `notification_state` and
+`whatsapp_messages.provider_sid` — have already been applied to the live
+Supabase database. On SQLite the app creates everything from the ORM on startup.
+
 ---
 
 ## 2. Twilio WhatsApp Sandbox (todo)

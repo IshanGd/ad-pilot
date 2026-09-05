@@ -212,7 +212,7 @@ def _aggregate(
         by_severity[r.severity] = by_severity.get(r.severity, 0) + 1
         by_type[r.type] = by_type.get(r.type, 0) + 1
     return RecommendationsResponse(
-        account_id=account_id,
+        account_id=str(account_id),
         language=language,
         total_waste_identified=round(waste, 2),
         recommendation_count=len(out),

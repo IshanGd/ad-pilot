@@ -58,6 +58,32 @@ no app or DB involved.
 Returns the new `account_id`, campaign/keyword counts, account totals, aggregate
 account averages, and a per-campaign breakdown (sorted by spend).
 
+## Phase 5 status — WhatsApp opt-in + delivery
+
+| Item | State |
+|---|---|
+| `POST /api/whatsapp/opt-in` — register number + language, set `notify_opt_in` | done |
+| `POST /api/whatsapp/send` — outbound message (explicit body or built from audit) | done |
+| `POST /api/whatsapp/check` — re-check an account, message only on a real change | done |
+| `scheduler/jobs.py` — the meaningful-change logic + `run_all_checks` sweep | done |
+| APScheduler wiring (gated by `SCHEDULER_ENABLED`, default off) | done |
+| Milestone: real WhatsApp message end to end from the sample data | needs Twilio creds |
+| Inbound replies (PAUSE / DETAILS / SCALE) | Phase 6 |
+
+**Confidence ladder (03_RULES §4).** A message is sent only when something
+meaningfully new is found — a new HIGH-severity keyword vs the last message, or
+total waste moving by more than `NOTIFY_WASTE_CHANGE_THRESHOLD` (15%). Otherwise
+nothing is sent. `notification_state` (one row per account) holds the last
+message's waste figure and HIGH keyword set.
+
+- `whatsapp_service.py` is the only place the Twilio SDK is used. With no Twilio
+  creds, opt-in/check still record state and report `twilio_not_configured` /
+  `would_send` instead of sending.
+- `POST /api/whatsapp/check` body: `{account_id, force?}`. `force: true` sends
+  regardless (demo). Response: `sent`, `reason`, `body`/`would_send`, `provider_sid`.
+- `scripts/whatsapp_smoke_test.py` (Phase 0) is still the quickest "does Twilio
+  work at all" check.
+
 ## Phase 4 status — LLM explainer
 
 | Item | State |

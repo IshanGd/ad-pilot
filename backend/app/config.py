@@ -24,10 +24,19 @@ class Settings(BaseSettings):
     llm_model: str = "claude-sonnet-5"
     explainer_enabled: bool = True
 
-    # Twilio (Phase 5-6).
+    # Twilio (Phase 5-6). When unset, WhatsApp send/opt-in still record state but
+    # skip the outbound message.
     twilio_account_sid: str | None = None
     twilio_auth_token: str | None = None
     twilio_whatsapp_number: str | None = None
+
+    # Scheduler (Phase 5). Off by default — the demo uses POST /api/whatsapp/check.
+    # When on, re-checks opted-in accounts on an interval and messages only on a
+    # meaningful change (03_RULES.md section 4).
+    scheduler_enabled: bool = False
+    scheduler_interval_minutes: int = 60
+    # Waste must move by more than this fraction since the last message to notify.
+    notify_waste_change_threshold: float = 0.15
 
     @field_validator(
         "waste_cost_threshold",

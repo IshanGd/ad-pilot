@@ -88,3 +88,37 @@ class Recommendation(Base):
     confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     estimated_impact: Mapped[float | None] = mapped_column(Float, nullable=True)
     status: Mapped[str] = mapped_column(String(16), default="PENDING")
+
+
+class WhatsAppMessage(Base):
+    __tablename__ = "whatsapp_messages"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), index=True)
+    direction: Mapped[str] = mapped_column(String(8))  # OUTBOUND | INBOUND
+    body: Mapped[str] = mapped_column(Text)
+    related_recommendation_id: Mapped[str | None] = mapped_column(
+        ForeignKey("recommendations.id"), nullable=True
+    )
+    provider_sid: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow
+    )
+
+
+class NotificationState(Base):
+    """One row per account: what the last WhatsApp notification was about, so the
+    scheduler can tell whether anything meaningfully new has appeared."""
+
+    __tablename__ = "notification_state"
+
+    account_id: Mapped[str] = mapped_column(
+        ForeignKey("accounts.id"), primary_key=True
+    )
+    last_notified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_waste: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # newline-joined HIGH-severity keyword labels at the time of the last message
+    last_high_keywords: Mapped[str | None] = mapped_column(Text, nullable=True)
+    last_message_id: Mapped[str | None] = mapped_column(String(36), nullable=True)

@@ -9,9 +9,14 @@ _db_fd, _db_path = tempfile.mkstemp(suffix=".db", prefix="adpilot_test_")
 os.close(_db_fd)
 os.environ["DATABASE_URL"] = f"sqlite:///{_db_path}"
 os.environ.pop("WASTE_COST_THRESHOLD", None)
-# Never hit a real LLM from the test suite — force the template path.
+# Never touch external services from the test suite. These override any values in
+# a local .env (empty string -> None via the Settings validator).
 os.environ["EXPLAINER_ENABLED"] = "false"
-os.environ.pop("LLM_API_KEY", None)
+os.environ["LLM_API_KEY"] = ""
+os.environ["TWILIO_ACCOUNT_SID"] = ""
+os.environ["TWILIO_AUTH_TOKEN"] = ""
+os.environ["TWILIO_WHATSAPP_NUMBER"] = ""
+os.environ["SCHEDULER_ENABLED"] = "false"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

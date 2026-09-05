@@ -70,4 +70,31 @@ export async function analyze(
   return res.json();
 }
 
+export interface OptInResponse {
+  account_id: string;
+  phone_number: string;
+  notify_opt_in: boolean;
+  preferred_language: string;
+  confirmation_sent: boolean;
+  warning: string | null;
+}
+
+export async function whatsappOptIn(
+  accountId: string,
+  phoneNumber: string,
+  language?: Language,
+): Promise<OptInResponse> {
+  const res = await fetch(`${API_BASE}/api/whatsapp/opt-in`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      account_id: accountId,
+      phone_number: phoneNumber,
+      ...(language ? { language } : {}),
+    }),
+  });
+  if (!res.ok) throw new ApiError(await readError(res), res.status);
+  return res.json();
+}
+
 export { ApiError };

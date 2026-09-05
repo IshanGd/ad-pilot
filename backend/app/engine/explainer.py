@@ -240,10 +240,19 @@ def _client():  # pragma: no cover - exercised via integration, not unit tests
     except ImportError:
         logger.warning("anthropic package not installed; explainer uses templates")
         return None
+    import os
+
+    if not (
+        settings.llm_api_key
+        or os.environ.get("ANTHROPIC_API_KEY")
+        or os.environ.get("ANTHROPIC_AUTH_TOKEN")
+    ):
+        logger.info("no LLM API key configured; explainer uses templates")
+        return None
     try:
         if settings.llm_api_key:
             return anthropic.Anthropic(api_key=settings.llm_api_key)
-        return anthropic.Anthropic()  # ANTHROPIC_API_KEY / profile, if present
+        return anthropic.Anthropic()  # ANTHROPIC_API_KEY / profile
     except Exception as exc:  # noqa: BLE001
         logger.warning("could not create Anthropic client: %s", exc)
         return None

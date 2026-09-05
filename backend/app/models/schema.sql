@@ -73,8 +73,22 @@ CREATE TABLE IF NOT EXISTS optimization_runs (
 CREATE TABLE IF NOT EXISTS whatsapp_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id UUID REFERENCES accounts(id) ON DELETE CASCADE,
-  direction TEXT,
+  direction TEXT,                 -- OUTBOUND | INBOUND
   body TEXT,
   related_recommendation_id UUID REFERENCES recommendations(id) ON DELETE SET NULL,
+  provider_sid TEXT,              -- Twilio message SID
   created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_messages_account ON whatsapp_messages(account_id);
+-- provider_sid was added in Phase 5; this makes re-running the file safe.
+ALTER TABLE whatsapp_messages ADD COLUMN IF NOT EXISTS provider_sid TEXT;
+
+-- Phase 5: what the last WhatsApp notification for an account was about, so the
+-- scheduler only messages on a meaningful change (03_RULES.md section 4).
+CREATE TABLE IF NOT EXISTS notification_state (
+  account_id UUID PRIMARY KEY REFERENCES accounts(id) ON DELETE CASCADE,
+  last_notified_at TIMESTAMPTZ,
+  last_waste NUMERIC,
+  last_high_keywords TEXT,        -- newline-joined HIGH keyword labels
+  last_message_id UUID
 );

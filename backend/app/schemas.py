@@ -84,3 +84,48 @@ class RecommendationsResponse(BaseModel):
 class AnalyzeResponse(RecommendationsResponse):
     analyzed_keywords: int
     llm_explanations: int  # how many explanations came from the LLM (rest are templates)
+
+
+# --- Phase 5: WhatsApp opt-in + delivery ---------------------------------
+
+
+class OptInRequest(BaseModel):
+    account_id: str
+    phone_number: str
+    language: str | None = None
+
+
+class OptInResponse(BaseModel):
+    account_id: str
+    phone_number: str
+    notify_opt_in: bool
+    preferred_language: str
+    confirmation_sent: bool
+    warning: str | None = None
+
+
+class SendRequest(BaseModel):
+    account_id: str
+    # When omitted, the message is built from the account's current audit.
+    body: str | None = None
+    related_recommendation_id: str | None = None
+
+
+class SendResponse(BaseModel):
+    account_id: str
+    provider_sid: str
+    body: str
+
+
+class CheckRequest(BaseModel):
+    account_id: str
+    force: bool = False  # send regardless of whether anything changed (demo)
+
+
+class CheckResponse(BaseModel):
+    account_id: str
+    sent: bool
+    reason: str
+    body: str | None = None
+    provider_sid: str | None = None
+    would_send: str | None = None  # message that would go out if Twilio were set
