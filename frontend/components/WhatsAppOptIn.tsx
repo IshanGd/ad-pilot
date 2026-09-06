@@ -42,12 +42,14 @@ type State =
 export function WhatsAppOptIn({
   accountId,
   language,
+  initialPhone,
 }: {
   accountId: string;
   language: Language;
+  initialPhone?: string;
 }) {
   const t = STRINGS[language];
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(initialPhone ?? "");
   const [state, setState] = useState<State>({ kind: "idle" });
 
   if (state.kind === "done") {

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <img src="icons/icon48.png" alt="" width="24" height="24" />
+      <span>AdPilot</span>
+    </header>
+
+    <p class="lede">
+      Drop in your Google Ads report and see what it's wasting. Free, no signup.
+    </p>
+
+    <label id="drop" class="drop" tabindex="0">
+      <input type="file" id="file" accept=".csv,.tsv,.txt,text/csv" hidden />
+      <span id="drop-text">Choose your .csv report</span>
+    </label>
+
+    <label class="field">
+      <span>WhatsApp number <em>(optional)</em></span>
+      <input type="tel" id="phone" inputmode="tel" placeholder="+91…" />
+      <small>Only used later, on the results page, if you opt in.</small>
+    </label>
+
+    <button id="go" disabled>Analyze</button>
+
+    <p id="status" class="status" hidden></p>
+
+    <footer>No Google login. No page scraping. Just the report you export.</footer>
+
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

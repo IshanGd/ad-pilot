@@ -37,9 +37,11 @@ const STRINGS = {
 export function AuditResult({
   audit,
   language,
+  initialPhone,
 }: {
   audit: AnalyzeResponse;
   language: Language;
+  initialPhone?: string;
 }) {
   const t = STRINGS[language];
   const wasted = audit.total_waste_identified;
@@ -90,7 +92,11 @@ export function AuditResult({
       <section className="mt-10">
         <h2 className="text-lg font-semibold">{t.watchTitle}</h2>
         <p className="mt-1 mb-3 text-sm text-muted">{t.watchSub}</p>
-        <WhatsAppOptIn accountId={audit.account_id} language={language} />
+        <WhatsAppOptIn
+          accountId={audit.account_id}
+          language={language}
+          initialPhone={initialPhone}
+        />
       </section>
 
       <div className="mt-10 text-sm text-muted">

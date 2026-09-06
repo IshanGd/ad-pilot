@@ -15,7 +15,9 @@ export default async function AuditPage({
   searchParams,
 }: PageProps<"/audit/[accountId]">) {
   const { accountId } = await params;
-  const language = toLanguage((await searchParams).lang);
+  const sp = await searchParams;
+  const language = toLanguage(sp.lang);
+  const initialPhone = typeof sp.phone === "string" ? sp.phone : undefined;
 
   if (accountId === DEMO_ACCOUNT_ID) {
     return <AuditResult audit={DEMO_AUDIT} language="en" />;
@@ -48,5 +50,11 @@ export default async function AuditPage({
     );
   }
 
-  return <AuditResult audit={audit} language={(audit.language as Language) ?? language} />;
+  return (
+    <AuditResult
+      audit={audit}
+      language={(audit.language as Language) ?? language}
+      initialPhone={initialPhone}
+    />
+  );
 }
