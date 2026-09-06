@@ -58,6 +58,25 @@ no app or DB involved.
 Returns the new `account_id`, campaign/keyword counts, account totals, aggregate
 account averages, and a per-campaign breakdown (sorted by spend).
 
+## Phase 8 status — budget optimizer + simulator
+
+| Item | State |
+|---|---|
+| `POST /api/budget/optimize` — split a monthly budget across campaigns | done |
+| `POST /api/simulation` — current vs projected cost per sale + sales count | done |
+| `engine/budget.py` + `engine/simulation.py` (pure, rule-based) | done |
+| `optimization_runs` row written on each simulation | done |
+| Frontend `/plan/[accountId]` (linked from the audit) | done |
+| Loading / error / empty states, sample CSV download | done (Phase 3) |
+
+- Budget: weight by value returned; zero-sale campaigns get nothing; each line
+  gets a plain reason (`SCALE_UP` / `TRIM` / `PAUSE` / `AVERAGE`).
+- Simulation: the money on zero-sale keywords is reinvested into the best
+  keyword at its cost per sale (or just saved if there's no efficient one).
+  Always labelled "projected impact, not a guarantee".
+- The `/plan` screen is English-only for now (the audit + WhatsApp loop are the
+  bilingual core); the reason codes make localising it straightforward later.
+
 ## Phase 6 status — reply-to-act loop
 
 | Item | State |

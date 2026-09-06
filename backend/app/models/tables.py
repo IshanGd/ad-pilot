@@ -90,6 +90,21 @@ class Recommendation(Base):
     status: Mapped[str] = mapped_column(String(16), default="PENDING")
 
 
+class OptimizationRun(Base):
+    __tablename__ = "optimization_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow
+    )
+    current_cpa: Mapped[float | None] = mapped_column(Float, nullable=True)
+    projected_cpa: Mapped[float | None] = mapped_column(Float, nullable=True)
+    current_conversions: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    projected_conversions: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    total_waste_identified: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+
 class WhatsAppMessage(Base):
     __tablename__ = "whatsapp_messages"
 

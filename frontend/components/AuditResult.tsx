@@ -18,6 +18,7 @@ const STRINGS = {
       "Nothing needs changing right now. Check back after your next report.",
     watchTitle: "Keep an eye on it for me",
     watchSub: "The audit above is free and yours to keep. This part is optional.",
+    plan: "See a budget plan",
     another: "Upload a different report",
   },
   hi: {
@@ -30,6 +31,7 @@ const STRINGS = {
     nothing: "अभी कुछ बदलने की ज़रूरत नहीं। अगली रिपोर्ट के बाद फिर देखें।",
     watchTitle: "मेरे लिए इस पर नज़र रखें",
     watchSub: "ऊपर का ऑडिट मुफ़्त है और आपका है। यह हिस्सा वैकल्पिक है।",
+    plan: "बजट योजना देखें",
     another: "दूसरी रिपोर्ट अपलोड करें",
   },
 };
@@ -99,8 +101,16 @@ export function AuditResult({
         />
       </section>
 
-      <div className="mt-10 text-sm text-muted">
-        <Link href="/upload" className="text-brand hover:underline">
+      <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        {audit.recommendations.length > 0 && (
+          <Link
+            href={`/plan/${audit.account_id}`}
+            className="font-medium text-brand hover:underline"
+          >
+            {t.plan} →
+          </Link>
+        )}
+        <Link href="/upload" className="text-muted hover:underline">
           {t.another}
         </Link>
       </div>

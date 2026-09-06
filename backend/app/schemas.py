@@ -143,3 +143,49 @@ class SimulateReplyResponse(BaseModel):
     account_id: str | None
     recommendation_id: str | None
     action_taken: bool
+
+
+# --- Phase 8: budget optimizer + simulator ------------------------------
+
+
+class BudgetOptimizeRequest(BaseModel):
+    account_id: str
+    total_budget: float = Field(gt=0)
+
+
+class CampaignAllocationOut(BaseModel):
+    campaign_id: str
+    name: str
+    current_spend: float
+    current_share: float
+    suggested_budget: float
+    suggested_share: float
+    delta: float
+    cpa: float | None
+    reason_code: str
+    reason: str
+
+
+class BudgetOptimizeResponse(BaseModel):
+    account_id: str
+    total_budget: float
+    current_total_spend: float
+    allocations: list[CampaignAllocationOut]
+
+
+class SimulationRequest(BaseModel):
+    account_id: str
+
+
+class SimulationResponse(BaseModel):
+    account_id: str
+    current_spend: float
+    current_conversions: float
+    current_cpa: float | None
+    projected_spend: float
+    projected_conversions: float
+    projected_cpa: float | None
+    monthly_saving: float
+    extra_sales: float
+    reinvested: bool
+    assumptions: list[str]

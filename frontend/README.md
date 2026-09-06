@@ -21,7 +21,7 @@ audit — see `../backend/README.md`.
 | Landing | `/` | done |
 | Upload (drag-drop CSV + sample download) | `/upload` | done |
 | Instant audit result (headline + ranked cards + opt-in) | `/audit/[accountId]` | done |
-| Budget optimizer / Simulator | — | Phase 8 |
+| Budget plan (simulator + optimizer) | `/plan/[accountId]` | done (Phase 8, English-only) |
 
 - `/audit/demo` renders the sample-CSV result from a static fixture
   (`lib/fixtures.ts`) — no backend needed. Handy for the demo and offline dev.

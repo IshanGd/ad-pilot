@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.models.db import init_db
-from app.routes import analyze, upload, whatsapp
+from app.routes import analyze, planning, upload, whatsapp
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +65,7 @@ app.add_middleware(
 app.include_router(upload.router)
 app.include_router(analyze.router)
 app.include_router(whatsapp.router)
+app.include_router(planning.router)
 
 
 @app.get("/health", tags=["meta"])

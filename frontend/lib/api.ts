@@ -1,4 +1,9 @@
-import type { AnalyzeResponse, UploadResponse } from "./types";
+import type {
+  AnalyzeResponse,
+  BudgetOptimizeResponse,
+  SimulationResponse,
+  UploadResponse,
+} from "./types";
 
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
@@ -64,6 +69,33 @@ export async function analyze(
       account_id: accountId,
       ...(language ? { language } : {}),
     }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new ApiError(await readError(res), res.status);
+  return res.json();
+}
+
+export async function optimizeBudget(
+  accountId: string,
+  totalBudget: number,
+): Promise<BudgetOptimizeResponse> {
+  const res = await fetch(`${API_BASE}/api/budget/optimize`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ account_id: accountId, total_budget: totalBudget }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new ApiError(await readError(res), res.status);
+  return res.json();
+}
+
+export async function runSimulation(
+  accountId: string,
+): Promise<SimulationResponse> {
+  const res = await fetch(`${API_BASE}/api/simulation`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ account_id: accountId }),
     cache: "no-store",
   });
   if (!res.ok) throw new ApiError(await readError(res), res.status);

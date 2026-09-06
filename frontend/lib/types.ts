@@ -49,6 +49,40 @@ export interface CampaignSummary {
   keyword_count: number;
 }
 
+export interface CampaignAllocation {
+  campaign_id: string;
+  name: string;
+  current_spend: number;
+  current_share: number;
+  suggested_budget: number;
+  suggested_share: number;
+  delta: number;
+  cpa: number | null;
+  reason_code: "PAUSE" | "SCALE_UP" | "TRIM" | "AVERAGE";
+  reason: string;
+}
+
+export interface BudgetOptimizeResponse {
+  account_id: string;
+  total_budget: number;
+  current_total_spend: number;
+  allocations: CampaignAllocation[];
+}
+
+export interface SimulationResponse {
+  account_id: string;
+  current_spend: number;
+  current_conversions: number;
+  current_cpa: number | null;
+  projected_spend: number;
+  projected_conversions: number;
+  projected_cpa: number | null;
+  monthly_saving: number;
+  extra_sales: number;
+  reinvested: boolean;
+  assumptions: string[];
+}
+
 export interface UploadResponse {
   account_id: string;
   campaigns: number;
