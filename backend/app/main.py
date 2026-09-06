@@ -54,9 +54,10 @@ app = FastAPI(
 )
 
 # Frontend (Next.js) and the Chrome extension call this API from other origins.
+_origins = [o.strip() for o in get_settings().cors_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_origins or ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

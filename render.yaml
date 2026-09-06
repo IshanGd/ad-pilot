@@ -1,0 +1,31 @@
+# Render blueprint for the AdPilot backend.
+# New → Blueprint → pick the repo. Fill the `sync: false` vars in the dashboard.
+# (Frontend goes to Vercel — see DEPLOY.md.)
+services:
+  - type: web
+    name: adpilot-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: DATABASE_URL        # Supabase session-pooler URL, postgresql+psycopg2://…
+        sync: false
+      - key: CORS_ORIGINS        # e.g. https://adpilot.vercel.app
+        sync: false
+      - key: LLM_API_KEY         # sk-ant-… (optional; templates used if unset)
+        sync: false
+      - key: LLM_MODEL
+        value: claude-sonnet-5
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        value: "+14155238886"
+      - key: SCHEDULER_ENABLED   # keep false on Render free (the instance sleeps)
+        value: "false"

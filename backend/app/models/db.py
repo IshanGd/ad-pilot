@@ -1,8 +1,10 @@
 """Database engine, session factory, and ORM base.
 
 Mirrors the schema in ``02_ARCHITECTURE.md`` / ``schema.sql``. On SQLite (local
-dev) the tables are created from the ORM metadata; on Postgres, run
-``schema.sql`` (or let ``init_db`` create them — the definitions match).
+dev) the tables are created from the ORM metadata on startup. On Postgres the
+ORM columns are ``VARCHAR(36)`` while the real columns are ``UUID`` — close
+enough for reads/writes but not for ``CREATE TABLE`` — so apply ``schema.sql``
+once at deploy and ``init_db`` leaves Postgres alone.
 """
 from __future__ import annotations
 
@@ -36,10 +38,11 @@ def new_uuid() -> str:
 
 
 def init_db() -> None:
-    """Create tables if they do not exist. Safe to call on every startup."""
+    """Create tables on SQLite. On Postgres, schema.sql is the source of truth."""
     from app.models import tables  # noqa: F401  (register mappers)
 
-    Base.metadata.create_all(bind=engine)
+    if _is_sqlite:
+        Base.metadata.create_all(bind=engine)
 
 
 def get_db() -> Iterator[Session]:

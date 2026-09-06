@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     # Deploy overrides this with a Postgres (Supabase) URL.
     database_url: str = "sqlite:///./adpilot.db"
 
+    # CORS. "*" for local dev and the Chrome extension; on deploy, set to the
+    # comma-separated frontend origin(s), e.g. "https://adpilot.vercel.app".
+    cors_origins: str = "*"
+
     # Rule-engine knob (Phase 2). When None, computed per-account as
     # max(500, 5% of total account spend). See 03_RULES.md section 1.
     waste_cost_threshold: float | None = None
