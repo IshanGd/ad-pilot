@@ -129,3 +129,17 @@ class CheckResponse(BaseModel):
     body: str | None = None
     provider_sid: str | None = None
     would_send: str | None = None  # message that would go out if Twilio were set
+
+
+class SimulateReplyRequest(BaseModel):
+    body: str
+    from_number: str | None = None
+    account_id: str | None = None  # alternative to from_number
+
+
+class SimulateReplyResponse(BaseModel):
+    reply_text: str
+    keyword: str | None
+    account_id: str | None
+    recommendation_id: str | None
+    action_taken: bool

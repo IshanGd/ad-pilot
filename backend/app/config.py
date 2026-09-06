@@ -38,12 +38,19 @@ class Settings(BaseSettings):
     # Waste must move by more than this fraction since the last message to notify.
     notify_waste_change_threshold: float = 0.15
 
+    # Inbound webhook (Phase 6). Signature validation is off by default because it
+    # requires the exact public URL Twilio calls (a tunnel host, usually) — set
+    # whatsapp_webhook_url to that when turning it on.
+    whatsapp_validate_signature: bool = False
+    whatsapp_webhook_url: str | None = None
+
     @field_validator(
         "waste_cost_threshold",
         "llm_api_key",
         "twilio_account_sid",
         "twilio_auth_token",
         "twilio_whatsapp_number",
+        "whatsapp_webhook_url",
         mode="before",
     )
     @classmethod

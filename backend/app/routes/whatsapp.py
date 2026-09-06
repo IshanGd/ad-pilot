@@ -1,14 +1,18 @@
-"""WhatsApp opt-in + outbound delivery (Phase 5).
+"""WhatsApp opt-in + outbound delivery (Phase 5) and inbound replies (Phase 6).
 
 Confidence ladder (03_RULES.md section 4): opt-in is only ever reached from the
 audit result screen, is an explicit action, and is never assumed. Inbound replies
-(PAUSE / DETAILS / SCALE) are Phase 6.
+(PAUSE / DETAILS / SCALE) act on the last recommendation the number was messaged
+about; the Google Ads mutation is simulated.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from xml.sax.saxutils import escape
+
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.engine.explainer import normalize_language
 from app.models.db import get_db
 from app.models.tables import Account, WhatsAppMessage
@@ -19,8 +23,11 @@ from app.schemas import (
     OptInResponse,
     SendRequest,
     SendResponse,
+    SimulateReplyRequest,
+    SimulateReplyResponse,
 )
 from app.scheduler.jobs import message_from_current_audit, run_notification_check
+from app.services.reply_service import handle_inbound
 from app.services.whatsapp_service import (
     WhatsAppNotConfigured,
     WhatsAppSendError,
@@ -159,3 +166,55 @@ def check(body: CheckRequest, db: Session = Depends(get_db)) -> CheckResponse:
     account = _account(db, body.account_id)
     outcome = run_notification_check(db, account, force=body.force)
     return CheckResponse(**outcome.as_dict())
+
+
+def _twiml(text: str) -> Response:
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        f"<Response><Message>{escape(text)}</Message></Response>"
+    )
+    return Response(content=xml, media_type="application/xml")
+
+
+@router.post("/webhook", summary="Twilio inbound WhatsApp webhook (PAUSE / DETAILS / SCALE)")
+async def webhook(request: Request, db: Session = Depends(get_db)) -> Response:
+    form = await request.form()
+    data = {k: str(v) for k, v in form.items()}
+
+    settings = get_settings()
+    if settings.whatsapp_validate_signature:
+        from twilio.request_validator import RequestValidator
+
+        validator = RequestValidator(settings.twilio_auth_token or "")
+        url = settings.whatsapp_webhook_url or str(request.url)
+        signature = request.headers.get("X-Twilio-Signature", "")
+        if not validator.validate(url, data, signature):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid Twilio signature",
+            )
+
+    result = handle_inbound(db, data.get("From", ""), data.get("Body", ""))
+    return _twiml(result.reply_text)
+
+
+@router.post(
+    "/simulate-reply",
+    response_model=SimulateReplyResponse,
+    summary="Run the reply handler without Twilio (demo / testing)",
+)
+def simulate_reply(
+    body: SimulateReplyRequest, db: Session = Depends(get_db)
+) -> SimulateReplyResponse:
+    from_number = body.from_number
+    if not from_number and body.account_id:
+        account = _account(db, body.account_id)
+        from_number = account.phone_number or ""
+    result = handle_inbound(db, from_number or "", body.body)
+    return SimulateReplyResponse(
+        reply_text=result.reply_text,
+        keyword=result.keyword,
+        account_id=result.account_id,
+        recommendation_id=result.recommendation_id,
+        action_taken=result.action_taken,
+    )

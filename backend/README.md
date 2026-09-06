@@ -58,6 +58,27 @@ no app or DB involved.
 Returns the new `account_id`, campaign/keyword counts, account totals, aggregate
 account averages, and a per-campaign breakdown (sorted by spend).
 
+## Phase 6 status — reply-to-act loop
+
+| Item | State |
+|---|---|
+| `POST /api/whatsapp/webhook` — Twilio inbound, returns TwiML `<Message>` | done |
+| `PAUSE` / `DETAILS` / `SCALE` keywords, tied to the last recommendation messaged | done |
+| Unrecognised reply → friendly fallback (never silence, never a stack trace) | done |
+| Simulated action: `recommendations.status` → `ACTIONED` + confirmation message | done |
+| `POST /api/whatsapp/simulate-reply` — run the handler without Twilio (demo/tests) | done |
+| Milestone: reply to a real WhatsApp message and get a response | needs a public URL |
+
+- Replies are matched to an account by the sender's number (most recent audit
+  wins). `PAUSE` acts on the last pausable finding, `SCALE` on the best
+  `INCREASE_BUDGET`, `DETAILS` explains without acting.
+- The Google Ads mutation is **simulated** — say so in the pitch.
+- Signature validation is opt-in (`WHATSAPP_VALIDATE_SIGNATURE=true` +
+  `WHATSAPP_WEBHOOK_URL=<exact public URL>`); off by default for tunnel testing.
+- The real inbound milestone needs Twilio to reach the webhook — a tunnel
+  (ngrok / cloudflared) or the deployed backend (Phase 9). Set the sandbox's
+  "When a message comes in" to `<public-url>/api/whatsapp/webhook`.
+
 ## Phase 5 status — WhatsApp opt-in + delivery
 
 | Item | State |
