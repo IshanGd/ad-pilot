@@ -1,6 +1,15 @@
-// AdPilot extension config. After Phase 9 deployment, replace these with the
-// deployed URLs and add the API origin to "host_permissions" in manifest.json.
+// AdPilot extension config.
+//
+// Deployed (default):
 window.ADPILOT_CONFIG = {
-  API_BASE: "http://127.0.0.1:8000",
-  WEB_BASE: "http://localhost:3000",
+  API_BASE: "https://adpilot-api-lv8o.onrender.com",
+  WEB_BASE: "https://ad-pilot-gamma.vercel.app",
 };
+
+// For local dev, comment out the block above and use:
+// window.ADPILOT_CONFIG = {
+//   API_BASE: "http://127.0.0.1:8000",
+//   WEB_BASE: "http://localhost:3000",
+// };
+//
+// If you change API_BASE, also update "host_permissions" in manifest.json.

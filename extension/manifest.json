@@ -18,6 +18,7 @@
     "128": "icons/icon128.png"
   },
   "host_permissions": [
+    "https://adpilot-api-lv8o.onrender.com/*",
     "http://127.0.0.1:8000/*",
     "http://localhost:8000/*"
   ]

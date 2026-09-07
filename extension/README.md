@@ -23,11 +23,14 @@ The backend (`../backend`) and web app (`../frontend`) must be running.
 
 ## Config
 
-`config.js` holds the two URLs (default: `127.0.0.1:8000` / `localhost:3000`).
-After Phase 9 deployment:
+`config.js` points at the **deployed** backend/frontend by default
+(`adpilot-api-lv8o.onrender.com` / `ad-pilot-gamma.vercel.app`); a commented
+block switches it to local. `manifest.json` `host_permissions` lists both the
+deployed API origin and localhost, so the same unpacked extension works either
+way — just edit `config.js` and reload the extension.
 
-- set `API_BASE` / `WEB_BASE` to the deployed URLs
-- add the deployed API origin to `host_permissions` in `manifest.json`
+If you deploy to different URLs, update both `config.js` and the
+`host_permissions` array.
 
 ## Files
 
