@@ -54,7 +54,13 @@ app = FastAPI(
 )
 
 # Frontend (Next.js) and the Chrome extension call this API from other origins.
-_origins = [o.strip() for o in get_settings().cors_origins.split(",") if o.strip()]
+# Browsers send the Origin header with no trailing slash, so normalise the
+# configured values to match (a stray "https://site/" is a common mistake).
+_origins = [
+    o.strip().rstrip("/")
+    for o in get_settings().cors_origins.split(",")
+    if o.strip()
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins or ["*"],
